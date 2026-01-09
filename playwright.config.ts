@@ -24,7 +24,13 @@ export default defineConfig({
     // baseURL: 'http://localhost:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    headless: false,
+    channel: 'msedge', // ✅ 用系统 Edge
+    launchOptions: {
+      args: [
+        '--disable-blink-features=AutomationControlled',
+      ],
+    },
   },
 
   /* Configure projects for major browsers */
@@ -59,9 +65,9 @@ export default defineConfig({
       name: 'Microsoft Edge',
       use: {
         ...devices['Desktop Edge'],
-        channel: 'msedge',
         launchOptions: {
-          executablePath: process.env.EDGE_PATH || 'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+          executablePath: 'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
+          args: ['--user-data-dir=C:/Users/00451606/AppData/Local/Microsoft/Edge/User Data'],
         },
       },
     },
