@@ -1,13 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { testConfig } from '../config';
 
+function rand(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+
 test('test', async ({ page }) => {
+  // 登录
   await page.goto('https://login.live.com/');
   await page.waitForTimeout(2000);
   await page.getByRole('textbox', { name: 'Email or phone number' }).click();
   await page.getByRole('textbox', { name: 'Email or phone number' }).fill(testConfig.email);
   await page.getByRole('textbox', { name: 'Email or phone number' }).press('Enter');
-  // await page.getByTestId('primaryButton').click();
   await page.waitForTimeout(2000);
   await page.getByRole('button', { name: 'Use your password' }).click();
   await page.getByRole('textbox', { name: 'Password' }).fill(testConfig.password);
@@ -17,18 +22,6 @@ test('test', async ({ page }) => {
   await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(2000);
 
-  // 第二次点击：在点击前验证页面活跃
-  // try {
-  //   await page.getByTestId('primaryButton').click();
-  //   await Promise.race([
-  //     page.waitForNavigation({ waitUntil: 'networkidle', timeout: 10000 }),
-  //     new Promise(resolve => setTimeout(resolve, 5000))
-  //   ]);
-  // } catch (e) {
-  //   // 点击失败或导航失败，继续
-  // }
-
-  // 确保能访问新页面
   try {
     await page.goto('https://cn.bing.com/');
   } catch (e) {
@@ -37,19 +30,31 @@ test('test', async ({ page }) => {
     return;
   }
   await page.waitForLoadState('domcontentloaded');
-  // const page1Promise = page.waitForEvent('popup');
-  // 等待这个链接出现再点击
-  await page.getByTitle('东北最大跨海桥突破').waitFor({ state: 'visible' });
-  await page.getByTitle('东北最大跨海桥突破').click();
-  const page1 = await page1Promise;
-  const page2Promise = page1.waitForEvent('popup');
-  // 等待元素可见再点击
-  await page1.getByRole('link', { name: 'Back to Bing search' }).waitFor({ state: 'visible' });
-  await page1.getByRole('link', { name: 'Back to Bing search' }).click();
-  const page2 = await page2Promise;
-  const page3Promise = page2.waitForEvent('popup');
-  // 等待元素可见再点击
-  await page2.getByRole('link', { name: '2299元波司登充绒量仅86克' }).waitFor({ state: 'visible' });
-  await page2.getByRole('link', { name: '2299元波司登充绒量仅86克' }).click();
-  const page3 = await page3Promise;
+  // 访问热搜
+  for (let i = 0; i < 24; i++) {
+    if (i % 6 === 0 && i !== 0) {
+      await page.getByRole('button', { name: 'Next', exact: true }).click();
+    }
+
+    const link = page.locator('.tob_list_current ul a').nth(i % 6)
+    // 确保可点
+    await link.waitFor({ state: 'visible' })
+
+    const [newPage] = await Promise.all([
+      page.context().waitForEvent('page'),
+      link.click({ force: true }),
+    ])
+
+    await newPage.hover('body')
+    const end = Date.now() + rand(3000, 5000)
+    await newPage.mouse.wheel(0, rand(500, 800))
+    while (Date.now() < end) {
+
+      await newPage.mouse.wheel(0, rand(-300, 800))
+      await newPage.waitForTimeout(rand(500, 1300))
+    }
+    await newPage.close()
+
+  }
+
 });
