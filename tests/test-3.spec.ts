@@ -32,6 +32,7 @@ test('test', async ({ page }) => {
   await page.waitForLoadState('domcontentloaded');
   // 访问热搜
   for (let i = 0; i < 24; i++) {
+    await page.waitForTimeout(1000);
     if (i % 6 === 0 && i !== 0) {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
     }
@@ -47,6 +48,7 @@ test('test', async ({ page }) => {
 
     await newPage.hover('body')
     const end = Date.now() + rand(3000, 5000)
+    await newPage.mouse.wheel(0, rand(500, 800))
     await newPage.mouse.wheel(0, rand(500, 800))
     while (Date.now() < end) {
 
