@@ -20,7 +20,7 @@ test('test', async ({ page }) => {
   await page.getByTestId('primaryButton').click();
   // 等待页面元素加载
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(4000);
 
   try {
     await page.goto('https://cn.bing.com/');
@@ -30,20 +30,25 @@ test('test', async ({ page }) => {
     return;
   }
   await page.waitForLoadState('domcontentloaded');
+  await page.getByText('国际版').click();//国际版算新的
   // 访问热搜
   for (let i = 0; i < 24; i++) {
     await page.waitForTimeout(1000);
     if (i % 6 === 0 && i !== 0) {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
+      // 等待新页面的热搜列表加载完成
+      await page.locator('.tob_list_current ul').waitFor({ state: 'visible' });
+      // 等待至少一个链接可见
+      await page.locator('.tob_list_current ul a').first().waitFor({ state: 'visible' });
     }
 
     const link = page.locator('.tob_list_current ul a').nth(i % 6)
     // 确保可点
     await link.waitFor({ state: 'visible' })
-
+    console.log('i', i)
     const [newPage] = await Promise.all([
       page.context().waitForEvent('page'),
-      link.click({ force: true }),
+      link.click(),
     ])
 
     await newPage.hover('body')
