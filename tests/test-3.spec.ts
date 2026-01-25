@@ -32,7 +32,16 @@ test('test', async ({ page }) => {
   await page.waitForLoadState('domcontentloaded');
   await page.getByText('国际版').click();//国际版算新的
   // 访问热搜
-  for (let i = 0; i < 24; i++) {
+  const currentHour = new Date().getHours()
+  let begin, end
+  if (currentHour >= 9 && currentHour <= 16) {
+    begin = 9
+    end = 16
+  } else {
+    begin = 17
+    end = 24
+  }
+  for (let i = begin; i < end; i++) {
     await page.waitForTimeout(1000);
     if (i % 6 === 0 && i !== 0) {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
